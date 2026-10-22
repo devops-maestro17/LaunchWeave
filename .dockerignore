@@ -1,0 +1,22 @@
+# Ignore virtual environments
+.venv/
+venv/
+env/
+
+# Ignore git metadata
+.git/
+.gitignore
+
+# Ignore python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore local environment files (credentials should be passed via env vars)
+.env
+.env.local
+
+# Ignore test results
+.pytest_cache/
+htmlcov/
+.coverage
