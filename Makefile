@@ -1,7 +1,7 @@
 # Makefile for LaunchWeave API
 
 # Variables
-PYTHON = .\.venv\Scripts\python.exe
+PYTHON = .venv/bin/python
 DOCKER_IMAGE_NAME = launchweave-api
 
 .PHONY: test build clean run
