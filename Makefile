@@ -1,17 +1,23 @@
 # Makefile for LaunchWeave API
 
 # Variables
-PYTHON = .venv/bin/python
+PYTHON = .\.venv\Scripts\python.exe
 DOCKER_IMAGE_NAME = launchweave-api
 
-.PHONY: test build clean run
+.PHONY: test build clean run test-neon
 
 # Default target
 all: test build
 
-# Run automated tests
+# Run automated tests (Local)
 test:
-	@echo "Running tests..."
+	@echo "Running tests against local database..."
+	$(PYTHON) -m pytest
+
+# Run automated tests against Neon DB
+# Usage: make test-neon TEST_DATABASE_URL="postgresql+psycopg2://..."
+test-neon:
+	@echo "Running tests against Neon database..."
 	$(PYTHON) -m pytest
 
 # Build the Docker image

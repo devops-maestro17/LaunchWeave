@@ -16,20 +16,20 @@ engine = create_engine(TEST_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def setup_db():
+    # create_all is safe: it only creates tables that don't exist
     Base.metadata.create_all(bind=engine)
-
-def teardown_db():
-    Base.metadata.drop_all(bind=engine)
 
 @pytest.fixture(scope="session", autouse=True)
 def db_setup():
     setup_db()
     yield
-    teardown_db()
+    # Destructive drop_all() removed to allow testing on persistent databases
 
 @pytest.fixture
 def db():
     connection = engine.connect()
+    # Begin a transaction. All changes made during the test 
+    # will be rolled back at the end, ensuring the DB stays clean.
     transaction = connection.begin()
     session = TestingSessionLocal(bind=connection)
     
