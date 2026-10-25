@@ -1,11 +1,10 @@
-
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
-# Load .env.local (Neon) and then .env as fallback
+# Load .env.local (Neon/local overrides) and .env
 load_dotenv(".env.local")
 load_dotenv()
 
@@ -15,11 +14,25 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://user:password@lo
 if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 
-engine = create_engine(DATABASE_URL)
+# Configure connection pool settings:
+# - pool_pre_ping=True: checks connection liveness before checkout to prevent stale socket errors
+# - connect_timeout: prevents psycopg2 from hanging indefinitely (default TCP timeout can be 75s+)
+#   if the database host is unreachable, DNS hangs, or firewall blocks port 5432.
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    connect_args={
+        "connect_timeout": int(os.getenv("DB_CONNECT_TIMEOUT", "5")),
+    },
+    pool_size=int(os.getenv("DB_POOL_SIZE", "5")),
+    max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "10")),
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def get_db():
+    """Dependency for obtaining an isolated database session per request."""
     db = SessionLocal()
     try:
         yield db
