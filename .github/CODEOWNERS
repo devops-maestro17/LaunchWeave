@@ -1,0 +1,12 @@
+# LaunchWeave Code Owners
+# Learn more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repository
+* @devops-maestro17
+
+# CI/CD and Infrastructure specialists
+/.github/ @devops-maestro17
+/terraform/ @devops-maestro17
+/helm/ @devops-maestro17
+/karpenter/ @devops-maestro17
+/gitops/ @devops-maestro17
