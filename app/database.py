@@ -15,11 +15,15 @@ if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 # Configure connection pool settings:
-# pool_pre_ping=True: checks connection liveness before checkout to prevent stale socket errors
-# (especially vital for serverless databases like Neon or cloud Aurora/RDS).
+# - pool_pre_ping=True: checks connection liveness before checkout to prevent stale socket errors
+# - connect_timeout: prevents psycopg2 from hanging indefinitely (default TCP timeout can be 75s+)
+#   if the database host is unreachable, DNS hangs, or firewall blocks port 5432.
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
+    connect_args={
+        "connect_timeout": int(os.getenv("DB_CONNECT_TIMEOUT", "5")),
+    },
     pool_size=int(os.getenv("DB_POOL_SIZE", "5")),
     max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "10")),
 )

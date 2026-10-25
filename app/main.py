@@ -1,3 +1,4 @@
+import asyncio
 import os
 from contextlib import asynccontextmanager
 from typing import List
@@ -14,12 +15,14 @@ async def lifespan(app: FastAPI):
     """
     Application lifespan context manager.
     Handles startup and shutdown events cleanly without blocking module import.
+    Uses asyncio.to_thread so slow database connections never block the event loop.
     In development, tables are auto-created if AUTO_CREATE_TABLES=true.
     In production / K8s, database migrations or Helm pre-sync jobs manage DDL.
     """
     if os.getenv("AUTO_CREATE_TABLES", "true").lower() in ("true", "1", "yes"):
         try:
-            models.Base.metadata.create_all(bind=engine)
+            await asyncio.to_thread(models.Base.metadata.create_all, bind=engine)
+            print("[INFO] Database tables verified/created successfully.")
         except Exception as exc:
             print(f"[WARN] Failed to auto-create tables on startup: {exc}")
     yield
@@ -47,6 +50,7 @@ def readyz(db: Session = Depends(get_db)):
         db.execute(text("SELECT 1"))
         return {"status": "ready"}
     except Exception as exc:
+        print(f"[ERROR] /readyz check failed: {exc}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"Database unreachable: {exc}",
