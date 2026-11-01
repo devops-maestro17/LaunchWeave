@@ -4,7 +4,7 @@
 # and keep the final image lean by excluding 
 # build tools (compilers, etc.)
 # ==========================================
-FROM python:3.12-slim AS builder
+FROM python:3.15-slim AS builder
 
 # Prevent Python from writing .pyc files and enable unbuffered logging
 # This ensures logs are sent straight to the terminal without buffering
@@ -29,7 +29,7 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 # ==========================================
 # STAGE 2: Final Runtime
 # ==========================================
-FROM python:3.12-slim
+FROM python:3.15-slim
 
 # Environment variables for Python optimization & server configuration
 # In Kubernetes, scaling horizontally (pod replicas) with 1-2 workers per container
